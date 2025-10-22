@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
+        // Configure API-only behavior: redirect unauthenticated users to JSON response instead of login route
+        $middleware->redirectGuestsTo(fn () => response()->json(['message' => 'Unauthenticated.'], 401));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
