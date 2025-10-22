@@ -12,6 +12,23 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
+// Debug endpoint to check auth and role
+Route::get('/debug/auth', function (Request $request) {
+    $user = $request->user();
+
+    return response()->json([
+        'authenticated' => $user !== null,
+        'user' => $user ? [
+            'id' => $user->id,
+            'email' => $user->email,
+            'role' => $user->role,
+            'role_type' => gettype($user->role),
+            'role_is_null' => $user->role === null,
+        ] : null,
+        'token_check' => $request->bearerToken() ? 'Token present' : 'No token',
+    ]);
+})->middleware('auth:sanctum');
+
 // User Profile Routes
 Route::put('/user/profile', [AuthController::class, 'updateProfile'])->middleware('auth:sanctum');
 Route::post('/user/profile-picture', [AuthController::class, 'uploadProfilePicture'])->middleware('auth:sanctum');
