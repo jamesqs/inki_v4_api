@@ -1,22 +1,76 @@
-## Thing in this project:
-Create a new module, you can use an artisan command:
+# Inki v4 API
+
+Modern real estate management API built with Laravel 11.
+
+## Features
+
+- ✅ **Modular Architecture** - Clean, scalable module structure
+- ✅ **RESTful API** - Comprehensive JSON API endpoints
+- ✅ **Authentication** - Laravel Sanctum token-based auth
+- ✅ **File Upload** - DigitalOcean Spaces (S3) integration
+- ✅ **Dynamic Forms** - Category-based attribute system
+- ✅ **Location Search** - Fast autocomplete with intelligent ranking
+- ✅ **Data Migration** - Tools for migrating from legacy database
+- ✅ **Multi-tenant** - Support for companies and users
+- ✅ **Statistics** - Market analysis and insights
+
+## Documentation
+
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - OpenAPI/Postman/Scramble guide
+- **[Developer Guide](docs/DEVELOPER_GUIDE.md)** - Complete development guide
+- **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Database migration guide
+- **[File Upload Guide](docs/FILE_UPLOAD_GUIDE.md)** - File upload documentation
+
+### Interactive API Docs
+
+View and test all endpoints: **http://inki.api.test/docs/api**
+
+Generate Postman collection:
 ```bash
-php artisan make:module Blog
+./scripts/generate-api-docs.sh
 ```
-This will create a new module in the `App/Modules` directory.
-Every necessary file will be created for you, like controller, model, routes, views, etc.
-You have to add the routes in the `routes/api.php` file of the module to the right role-based middleware group.
-For example, if you want to create a route that only authenticated users can access, you have to add it to the `auth` middleware group.
-```php
-Route::middleware(['auth'])->group(function () {
-    Route::get('/posts', [PostController::class, 'index']);
-});
+
+See **[API_DOCS_QUICK_START.md](API_DOCS_QUICK_START.md)** for quick setup.
+
+## Quick Start
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
 ```
-You can also create a route that only admin users can access by adding it to the `admin` middleware group.
-```php
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::post('/posts', [PostController::class, 'store']);
-});
+
+**Full installation guide:** See `docs/DEVELOPER_GUIDE.md`
+
+## API Endpoints
+
+### Public
+- `GET /api/public/v1/estate` - List estates
+- `GET /api/public/v1/location/search?q=...` - Search locations
+- `GET /api/public/v1/category/{id}/attributes` - Get form fields
+
+### Admin (Auth Required)
+- `POST /api/private/v1/admin/media/upload` - Upload file
+- `POST /api/private/v1/admin/estate` - Create estate
+
+## Custom Commands
+
+```bash
+# Migrate old database
+php artisan migrate:old-db [--dry-run]
+
+# Migrate form attributes  
+php artisan migrate:attributes [--dry-run]
 ```
-The necessary CRUD routes are already created for you in the `routes/api.php` file of the module at the end of the file.
-You can modify them as you want.
+
+## Tech Stack
+
+- Laravel 11.x
+- PHP 8.2+
+- MySQL 8.0+
+- DigitalOcean Spaces (S3)
+- Laravel Sanctum
+
+For complete documentation, see `/docs` directory.

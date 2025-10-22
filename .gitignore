@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# API Documentation (generated files)
+/api.json
+/postman_collection.json

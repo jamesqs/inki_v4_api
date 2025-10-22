@@ -20,10 +20,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'phone',
+        'show_phone',
         'password',
         'role',
-        'company_id'
+        'company_id',
+        'profile_picture_id'
     ];
 
     /**
@@ -46,6 +51,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'show_phone' => 'boolean',
         ];
     }
 
@@ -69,6 +75,12 @@ class User extends Authenticatable
     public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    // Relationship with profile picture
+    public function profilePicture(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Media\Models\Media::class, 'profile_picture_id');
     }
 
 }

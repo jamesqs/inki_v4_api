@@ -46,15 +46,28 @@ class StatisticsController extends Controller
     public function getMarketTrends(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'location_id' => 'required|integer|exists:locations,id',
+            'location_id' => 'required|string|max:255',
             'category_id' => 'required|integer|exists:categories,id',
             'months' => 'nullable|integer|min:1|max:24'
         ]);
 
         try {
+            // Resolve location_id (can be numeric ID or slug)
+            $locationId = $this->resolveLocationId($validated['location_id']);
+
+            if (!$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Location not found',
+                    'errors' => [
+                        'location_id' => ['The selected location is invalid.']
+                    ]
+                ], 422);
+            }
+
             $months = $validated['months'] ?? 12;
             $trends = $this->pricingService->getMarketTrends(
-                $validated['location_id'],
+                $locationId,
                 $validated['category_id'],
                 $months
             );
@@ -78,13 +91,26 @@ class StatisticsController extends Controller
     public function getPriceDistribution(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'location_id' => 'required|integer|exists:locations,id',
+            'location_id' => 'required|string|max:255',
             'category_id' => 'required|integer|exists:categories,id',
         ]);
 
         try {
+            // Resolve location_id (can be numeric ID or slug)
+            $locationId = $this->resolveLocationId($validated['location_id']);
+
+            if (!$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Location not found',
+                    'errors' => [
+                        'location_id' => ['The selected location is invalid.']
+                    ]
+                ], 422);
+            }
+
             $distribution = $this->pricingService->getPriceDistribution(
-                $validated['location_id'],
+                $locationId,
                 $validated['category_id']
             );
 
@@ -107,13 +133,28 @@ class StatisticsController extends Controller
     public function getMarketInsights(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'location_id' => 'required|integer|exists:locations,id',
+            'location_id' => 'required|string|max:255',
             'category_id' => 'required|integer|exists:categories,id',
             'attributes' => 'nullable|array',
             'attributes.*' => 'string|max:255',
         ]);
 
         try {
+            // Resolve location_id (can be numeric ID or slug)
+            $locationId = $this->resolveLocationId($validated['location_id']);
+
+            if (!$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Location not found',
+                    'errors' => [
+                        'location_id' => ['The selected location is invalid.']
+                    ]
+                ], 422);
+            }
+
+            $validated['location_id'] = $locationId;
+
             $analysis = $this->pricingService->calculateTargetPrice($validated);
             $trends = $this->pricingService->getMarketTrends(
                 $validated['location_id'],
@@ -148,17 +189,31 @@ class StatisticsController extends Controller
     public function getAvailableAttributes(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'location_id' => 'required|integer|exists:locations,id',
+            'location_id' => 'required|string|max:255',
             'category_id' => 'required|integer|exists:categories,id',
         ]);
 
         try {
+            // Resolve location_id (can be numeric ID or slug)
+            $locationId = $this->resolveLocationId($validated['location_id']);
+
+            if (!$locationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Location not found',
+                    'errors' => [
+                        'location_id' => ['The selected location is invalid.']
+                    ]
+                ], 422);
+            }
+
+            $validated['location_id'] = $locationId;
             $availableValues = $this->getAvailableAttributeValues($validated);
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'location_id' => $validated['location_id'],
+                    'location_id' => $locationId,
                     'category_id' => $validated['category_id'],
                     'available_attributes' => $availableValues,
                 ],
@@ -207,5 +262,24 @@ class StatisticsController extends Controller
         }
 
         return $availableValues;
+    }
+
+    /**
+     * Resolve location ID from either numeric ID or slug/name
+     */
+    private function resolveLocationId($input): ?int
+    {
+        // If it's already a numeric ID, verify it exists
+        if (is_numeric($input)) {
+            $location = \App\Modules\Locations\Models\Location::find((int)$input);
+            return $location ? $location->id : null;
+        }
+
+        // Otherwise, treat it as a slug or name (case-insensitive)
+        $location = \App\Modules\Locations\Models\Location::where('slug', strtolower($input))
+            ->orWhereRaw('LOWER(name) = ?', [strtolower($input)])
+            ->first();
+
+        return $location ? $location->id : null;
     }
 }

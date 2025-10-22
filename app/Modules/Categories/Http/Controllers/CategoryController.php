@@ -97,13 +97,16 @@ class CategoryController extends Controller
                 return [
                     'id' => $attribute->id,
                     'name' => $attribute->name,
+                    'slug' => $attribute->slug,
                     'display_name' => $attribute->display_name,
                     'type' => $attribute->type,
                     'options' => $attribute->options,
-                    'required' => $attribute->pivot->required,
-                    'order' => $attribute->pivot->order,
-                    'created_at' => $attribute->pivot->created_at,
-                    'updated_at' => $attribute->pivot->updated_at,
+                    'pivot' => [
+                        'required' => $attribute->pivot->required,
+                        'order' => $attribute->pivot->order,
+                        'created_at' => $attribute->pivot->created_at,
+                        'updated_at' => $attribute->pivot->updated_at,
+                    ]
                 ];
             })
         ]);

@@ -20,13 +20,44 @@ class EstateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Define your validation rules here
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:estates,slug,' . ($this->estate->id ?? 'null') . ',id',
-            'description' => 'nullable|string',
+            // Basic info
+            'status' => 'required|in:draft,pending_review,approved,rejected,archived',
+            'listing_type' => 'required|in:sale,rent',
+            'category_id' => 'required|exists:categories,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|min:50',
+
+            // Price
             'price' => 'required|numeric|min:0',
+            'price_type' => 'required|in:fixed,auction',
+            'currency' => 'required|in:HUF,EUR',
+
+            // Location
             'location_id' => 'required|exists:locations,id',
-            'category_id' => 'required|exists:categories,id'
+
+            // Address
+            'address' => 'required|array',
+            'address.zip' => 'required|string',
+            'address.street' => 'required|string',
+            'address.house_number' => 'nullable|string',
+            'address.plot_number' => 'nullable|string',
+            'address.display_mode' => 'required|in:exact,street,street_only,city_only',
+            'address.coordinates' => 'nullable|array',
+            'address.coordinates.lat' => 'nullable|numeric',
+            'address.coordinates.lng' => 'nullable|numeric',
+
+            // Attributes
+            'attributes' => 'nullable|array',
+
+            // Photos
+            'photos' => 'nullable|array',
+
+            // Floor plan data - accept any valid array structure
+            'floor_plan_data' => 'nullable|array',
+
+            // Optional fields for backward compatibility
+            'slug' => 'nullable|string|max:255|unique:estates,slug,' . ($this->estate->id ?? 'null') . ',id',
+            'name' => 'nullable|string|max:255',  // Can use 'title' or 'name'
         ];
     }
 

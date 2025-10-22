@@ -2,6 +2,7 @@
 
 namespace App\Modules\Blog\Http\Resources;
 
+use App\Modules\Media\Http\Resources\MediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -30,7 +31,9 @@ class BlogPostResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'category' => $this->whenLoaded('category'),
-            'author' => $this->whenLoaded('author')
+            'author' => $this->whenLoaded('author'),
+            'media' => MediaResource::collection($this->whenLoaded('media')),
+            'featured_image' => new MediaResource($this->whenLoaded('featuredImage'))
         ];
     }
 }

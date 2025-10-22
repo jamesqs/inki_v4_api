@@ -37,6 +37,15 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e): \Symfony\Component\HttpFoundation\Response
     {
+        // Handle authentication errors - return JSON for API requests
+        if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated.',
+                'status' => 401
+            ], 401);
+        }
+
         // Handle validation errors
         if ($e instanceof \Illuminate\Validation\ValidationException) {
             return response()->json([
@@ -45,6 +54,15 @@ class Handler extends ExceptionHandler
                 'errors' => $e->errors(),
                 'status' => 422
             ], 422);
+        }
+
+        // Handle authorization errors
+        if ($e instanceof \Illuminate\Auth\Access\AuthorizationException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+                'status' => 403
+            ], 403);
         }
 
         // Handle other exceptions
