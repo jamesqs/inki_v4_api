@@ -31,6 +31,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'role' => 'user', // Explicitly set role for new registrations
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -326,6 +327,7 @@ class AuthController extends Controller
                     'email' => $googleUser['email'],
                     'password' => Hash::make(Str::random(32)), // Random password for OAuth users
                     'email_verified_at' => now(), // Google emails are verified
+                    'role' => 'user', // Explicitly set role for OAuth users
                 ]);
             }
 
@@ -389,6 +391,7 @@ class AuthController extends Controller
                     'email' => $facebookUser['email'],
                     'password' => Hash::make(Str::random(32)), // Random password for OAuth users
                     'email_verified_at' => now(), // Facebook emails are verified
+                    'role' => 'user', // Explicitly set role for OAuth users
                 ]);
             }
 
